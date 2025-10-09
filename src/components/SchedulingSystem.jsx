@@ -23,12 +23,12 @@ const SchedulingSystem = () => {
 
   // 員工資料 (諮詢師)
   const staff = [
-    { id: 'juju', name: '句句', color: '#e91e63', status: 'on', clients: 33 },
-    { id: 'daoxuan', name: '道玄', color: '#2196f3', status: 'on', clients: 17 },
-    { id: 'anan', name: '安安', color: '#4caf50', status: 'on', clients: 14 },
-    { id: 'zhexuan', name: '哲軒', color: '#ff9800', status: 'off', clients: 9 },
-    { id: 'mimi', name: '米米', color: '#9c27b0', status: 'on', clients: 4 },
-    { id: 'huar', name: '花兒', color: '#f44336', status: 'on', clients: 8 }
+    { id: 'wanqing', name: '萬晴', color: '#e91e63', status: 'on', clients: 8 },
+    { id: 'liuzhexuan', name: '劉哲軒', color: '#2196f3', status: 'on', clients: 12 },
+    { id: 'zhanggengqi', name: '張耿齊', color: '#4caf50', status: 'on', clients: 15 },
+    { id: 'xiehuayang', name: '謝鏵翧', color: '#ff9800', status: 'on', clients: 10 },
+    { id: 'wangzhuju', name: '王筑句', color: '#9c27b0', status: 'on', clients: 33 },
+    { id: 'chenyunan', name: '陳韻安', color: '#f44336', status: 'on', clients: 6 }
   ]
 
   const [doctorSchedule, setDoctorSchedule] = useState(doctors)

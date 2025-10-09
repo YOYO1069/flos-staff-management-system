@@ -36,21 +36,39 @@ function App() {
 
   // 基於真實客戶資料的今日預約 (移除假資訊，使用實際療程)
   const todayAppointments = [
-    { id: 1, time: '09:00', customer: '郭怡萱', service: 'EMB', status: 'confirmed', staff: '道玄', consultant: '道玄' },
-    { id: 2, time: '10:30', customer: '翁玉蘭', service: '猛健樂', status: 'pending', staff: '米米', consultant: '米米' },
-    { id: 3, time: '14:00', customer: '謝政均', service: '震波', status: 'confirmed', staff: '句句', consultant: '句句' },
-    { id: 4, time: '15:30', customer: '潘承延', service: '猛健樂', status: 'in-progress', staff: '句句', consultant: '句句' },
-    { id: 5, time: '16:30', customer: '廖喬芝', service: 'EMB', status: 'confirmed', staff: '哲軒', consultant: '哲軒' }
+    { id: 1, time: '09:00', customer: '郭怡萱', service: 'EMB', status: 'confirmed', staff: '鍾曜任醫師', consultant: '張耿齊諮詢師' },
+    { id: 2, time: '10:30', customer: '翁玉蘭', service: '猛健樂', status: 'pending', staff: '藍子軒醫師', consultant: '王筑句諮詢師' },
+    { id: 3, time: '14:00', customer: '謝政均', service: '震波', status: 'confirmed', staff: '林思宇醫師', consultant: '劉哲軒諮詢師' },
+    { id: 4, time: '15:30', customer: '潘承延', service: '猛健樂', status: 'in-progress', staff: '郭昌𣿰醫師', consultant: '萬晴諮詢師' },
+    { id: 5, time: '16:30', customer: '廖喬芝', service: 'EMB', status: 'confirmed', staff: '何逸群醫師', consultant: '謝鏵翧諮詢師' }
   ]
 
   // 真實FLOS醫師和諮詢師團隊
   const staffSchedule = [
-    { id: 1, name: '鍾曜任醫師', status: 'on', shift: '12:00-20:30', appointments: 3, specialties: ['皮秒雷射', '音波拉提'] },
-    { id: 2, name: '林思宇醫師', status: 'on', shift: '12:00-20:30', appointments: 2, specialties: ['猛健樂', '震波'] },
-    { id: 3, name: '句句諮詢師', status: 'on', shift: '12:00-20:30', appointments: 33, specialties: ['客戶諮詢', '療程規劃'] },
-    { id: 4, name: '道玄諮詢師', status: 'on', shift: '12:00-20:30', appointments: 17, specialties: ['客戶諮詢', '療程規劃'] },
-    { id: 5, name: '安安諮詢師', status: 'on', shift: '12:00-20:30', appointments: 14, specialties: ['客戶諮詢', '療程規劃'] },
-    { id: 6, name: '哲軒諮詢師', status: 'off', shift: '休假', appointments: 0, specialties: ['客戶諮詢', '療程規劃'] }
+    // 醫師團隊
+    { id: 1, name: '鍾曜任醫師', status: 'on', shift: '12:00-20:30', appointments: 3, specialties: ['皮秒雷射', '音波拉提'], role: '醫師' },
+    { id: 2, name: '蔡秉遑醫師', status: 'on', shift: '12:00-20:30', appointments: 2, specialties: ['電波拉皮', 'EMB'], role: '醫師' },
+    { id: 3, name: '藍子軒醫師', status: 'on', shift: '12:00-20:30', appointments: 1, specialties: ['猛健樂', '震波'], role: '醫師' },
+    { id: 4, name: '黃俊堯醫師', status: 'on', shift: '12:00-20:30', appointments: 2, specialties: ['ONDA', 'NEO'], role: '醫師' },
+    { id: 5, name: '伍詠聰醫師', status: 'on', shift: '12:00-20:30', appointments: 1, specialties: ['肉毒桿菌', '玻尿酸'], role: '醫師' },
+    { id: 6, name: '盧仕鈞醫師', status: 'on', shift: '12:00-20:30', appointments: 1, specialties: ['海菲秀', 'SEYO'], role: '醫師' },
+    { id: 7, name: '林思宇醫師', status: 'on', shift: '12:00-20:30', appointments: 2, specialties: ['點滴療程', '除毛'], role: '醫師' },
+    { id: 8, name: '王昱淞醫師', status: 'on', shift: '12:00-20:30', appointments: 1, specialties: ['酷捷', '震波'], role: '醫師' },
+    { id: 9, name: '何逸群醫師', status: 'on', shift: '12:00-20:30', appointments: 1, specialties: ['皮秒雷射', 'EMB'], role: '醫師' },
+    { id: 10, name: '郭昌𣿰醫師', status: 'on', shift: '12:00-20:30', appointments: 1, specialties: ['猛健樂', '音波拉提'], role: '醫師' },
+    
+    // 諮詢師團隊
+    { id: 11, name: '萬晴諮詢師', status: 'on', shift: '12:00-20:30', appointments: 8, specialties: ['客戶諮詢', '療程規劃'], role: '諮詢師' },
+    { id: 12, name: '劉哲軒諮詢師', status: 'on', shift: '12:00-20:30', appointments: 12, specialties: ['客戶諮詢', '療程規劃'], role: '諮詢師' },
+    { id: 13, name: '張耿齊諮詢師', status: 'on', shift: '12:00-20:30', appointments: 15, specialties: ['客戶諮詢', '療程規劃'], role: '諮詢師' },
+    { id: 14, name: '謝鏵翧諮詢師', status: 'on', shift: '12:00-20:30', appointments: 10, specialties: ['客戶諮詢', '療程規劃'], role: '諮詢師' },
+    { id: 15, name: '王筑句諮詢師', status: 'on', shift: '12:00-20:30', appointments: 33, specialties: ['客戶諮詢', '療程規劃'], role: '諮詢師' },
+    
+    // 護理師團隊
+    { id: 16, name: '陳韻安護理師', status: 'on', shift: '12:00-20:30', appointments: 6, specialties: ['療程協助', '術後護理'], role: '護理師' },
+    { id: 17, name: '李文華護理師', status: 'on', shift: '12:00-20:30', appointments: 8, specialties: ['療程協助', '術後護理'], role: '護理師' },
+    { id: 18, name: '洪揚程護理師', status: 'on', shift: '12:00-20:30', appointments: 5, specialties: ['療程協助', '術後護理'], role: '護理師' },
+    { id: 19, name: '黃璦瑄護理師', status: 'off', shift: '休假', appointments: 0, specialties: ['療程協助', '術後護理'], role: '護理師' }
   ]
 
   const getStatusColor = (status) => {

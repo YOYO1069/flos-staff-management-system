@@ -128,7 +128,7 @@ const CustomerManagement = () => {
   ]
 
   const customerTags = ['VIP', '新客', '回頭客', '高消費', '潛在客戶']
-  const sources = ['LINE Bot', '官網預約', '朋友推薦', 'Google廣告', 'Facebook', '其他']
+  const sources = ['LINE Bot', '官網預約', '朋友推薦', 'Google廣告', 'Facebook', 'Instagram', '團購領袖-椏喬', '團購領袖-怡卉', '團購領袖-射後不理', '員工推薦', '醫師推薦', '其他']
 
   const filteredCustomers = customers.filter(customer => {
     const matchesSearch = customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||

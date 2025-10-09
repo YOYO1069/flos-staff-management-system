@@ -31,13 +31,14 @@ export const realReferralSources = [
   { source: 'Google搜尋', count: 0, percentage: 0 },
   { source: 'Facebook', count: 0, percentage: 0 },
   { source: 'Instagram', count: 0, percentage: 0 },
-  { source: 'LINE', count: 0, percentage: 0 },
+  { source: 'LINE Bot', count: 0, percentage: 0 },
+  { source: '官網預約', count: 0, percentage: 0 },
   { source: '親友推薦', count: 0, percentage: 0 },
   
-  // 團購主
-  { source: '團購主-椏喬', count: 0, percentage: 0 },
-  { source: '團購主-怡卉', count: 0, percentage: 0 },
-  { source: '團購主-射後不理', count: 0, percentage: 0 },
+  // 團購領袖
+  { source: '團購領袖-椏喬', count: 0, percentage: 0 },
+  { source: '團購領袖-怡卉', count: 0, percentage: 0 },
+  { source: '團購領袖-射後不理', count: 0, percentage: 0 },
   
   // 醫師推薦
   { source: '醫師-鍾曜任', count: 0, percentage: 0 },
@@ -68,13 +69,16 @@ export const realReferralSources = [
 // 來源備註選項
 export const sourceNoteOptions = [
   '無',
-  '團購活動',
+  '團購活動-椏喬',
+  '團購活動-怡卉', 
+  '團購活動-射後不理',
   '特殊優惠',
   '朋友介紹',
   '網路廣告',
   '社群媒體',
   '口碑推薦',
   '回頭客',
+  '員工推薦',
   '其他'
 ];
 
