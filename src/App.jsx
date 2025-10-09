@@ -11,6 +11,7 @@ import ConsentFormManagement from './components/ConsentFormManagement.jsx'
 import MedicalTeamScheduling from './components/MedicalTeamScheduling.jsx'
 import SchedulingSystem from './components/SchedulingSystem.jsx'
 import PatientRecordManagement from './components/PatientRecordManagement.jsx'
+import BusinessHours from './components/BusinessHours.jsx'
 import './App.css'
 
 function App() {
@@ -124,48 +125,48 @@ function App() {
       </header>
 
       {/* 主要內容 */}
-      <main className="container mx-auto px-6 py-8">
+      <main className="container mx-auto mobile-first">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {/* 標籤導航 */}
-          <TabsList className="grid w-full grid-cols-8 bg-slate-800/50 border border-slate-700">
-            <TabsTrigger value="dashboard" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <BarChart3 className="w-4 h-4 mr-2" />
-              儀表板
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 bg-slate-800/50 border border-slate-700 gap-1">
+            <TabsTrigger value="dashboard" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white responsive-button">
+              <BarChart3 className="w-4 h-4 mr-1 sm:mr-2 hidden sm:block" />
+              <span className="text-xs sm:text-sm">儀表板</span>
             </TabsTrigger>
-            <TabsTrigger value="appointments" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <Calendar className="w-4 h-4 mr-2" />
-              預約管理
+            <TabsTrigger value="appointments" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white responsive-button">
+              <Calendar className="w-4 h-4 mr-1 sm:mr-2 hidden sm:block" />
+              <span className="text-xs sm:text-sm">預約</span>
             </TabsTrigger>
-            <TabsTrigger value="customers" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <Users className="w-4 h-4 mr-2" />
-              客戶管理
+            <TabsTrigger value="customers" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white responsive-button">
+              <Users className="w-4 h-4 mr-1 sm:mr-2 hidden sm:block" />
+              <span className="text-xs sm:text-sm">客戶</span>
             </TabsTrigger>
-            <TabsTrigger value="patients" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <FileText className="w-4 h-4 mr-2" />
-              病例管理
+            <TabsTrigger value="patients" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white responsive-button">
+              <FileText className="w-4 h-4 mr-1 sm:mr-2 hidden sm:block" />
+              <span className="text-xs sm:text-sm">病例</span>
             </TabsTrigger>
-            <TabsTrigger value="staff" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <UserCheck className="w-4 h-4 mr-2" />
-              員工管理
+            <TabsTrigger value="staff" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white responsive-button">
+              <UserCheck className="w-4 h-4 mr-1 sm:mr-2 hidden sm:block" />
+              <span className="text-xs sm:text-sm">員工</span>
             </TabsTrigger>
-            <TabsTrigger value="consent" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <Activity className="w-4 h-4 mr-2" />
-              同意書管理
+            <TabsTrigger value="consent" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white responsive-button">
+              <Activity className="w-4 h-4 mr-1 sm:mr-2 hidden sm:block" />
+              <span className="text-xs sm:text-sm">同意書</span>
             </TabsTrigger>
-            <TabsTrigger value="team" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <Settings className="w-4 h-4 mr-2" />
-              醫療團隊
+            <TabsTrigger value="team" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white responsive-button">
+              <Settings className="w-4 h-4 mr-1 sm:mr-2 hidden sm:block" />
+              <span className="text-xs sm:text-sm">團隊</span>
             </TabsTrigger>
-            <TabsTrigger value="scheduling" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
-              <Calendar className="w-4 h-4 mr-2" />
-              整合排班
+            <TabsTrigger value="scheduling" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white responsive-button">
+              <Calendar className="w-4 h-4 mr-1 sm:mr-2 hidden sm:block" />
+              <span className="text-xs sm:text-sm">排班</span>
             </TabsTrigger>
           </TabsList>
 
           {/* 儀表板 */}
           <TabsContent value="dashboard" className="space-y-6">
             {/* 統計卡片 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+            <div className="responsive-grid lg:grid-cols-5">
               <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-slate-300">今日預約</CardTitle>
@@ -222,41 +223,51 @@ function App() {
               </Card>
             </div>
 
-            {/* 今日預約概覽 */}
-            <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-white flex items-center">
-                  <Clock className="w-5 h-5 mr-2 text-blue-400" />
-                  今日預約概覽
-                </CardTitle>
-                <CardDescription className="text-slate-400">
-                  今天的預約安排和狀態
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  {todayAppointments.map((appointment) => (
-                    <div key={appointment.id} className="flex items-center justify-between p-4 bg-slate-700/30 rounded-lg border border-slate-600">
-                      <div className="flex items-center space-x-4">
-                        <div className="text-sm font-medium text-blue-400 min-w-[60px]">
-                          {appointment.time}
+            {/* 主要內容區域 */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-6">
+              {/* 今日預約概覽 */}
+              <div className="lg:col-span-2">
+                <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+                  <CardHeader>
+                    <CardTitle className="text-white flex items-center">
+                      <Clock className="w-5 h-5 mr-2 text-blue-400" />
+                      今日預約概覽
+                    </CardTitle>
+                    <CardDescription className="text-slate-400">
+                      今天的預約安排和狀態
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      {todayAppointments.map((appointment) => (
+                        <div key={appointment.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-3 sm:p-4 bg-slate-700/30 rounded-lg border border-slate-600 space-y-2 sm:space-y-0">
+                          <div className="flex items-center space-x-3 sm:space-x-4">
+                            <div className="text-sm font-medium text-blue-400 min-w-[50px] sm:min-w-[60px]">
+                              {appointment.time}
+                            </div>
+                            <div>
+                              <div className="font-medium text-white text-sm sm:text-base">{appointment.customer}</div>
+                              <div className="text-xs sm:text-sm text-slate-400">{appointment.service}</div>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between sm:justify-end space-x-2 sm:space-x-3">
+                            <div className="text-xs sm:text-sm text-slate-300 hidden sm:block">{appointment.staff}</div>
+                            <Badge className={getStatusColor(appointment.status)}>
+                              {getStatusText(appointment.status)}
+                            </Badge>
+                          </div>
                         </div>
-                        <div>
-                          <div className="font-medium text-white">{appointment.customer}</div>
-                          <div className="text-sm text-slate-400">{appointment.service}</div>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-3">
-                        <div className="text-sm text-slate-300">{appointment.staff}</div>
-                        <Badge className={getStatusColor(appointment.status)}>
-                          {getStatusText(appointment.status)}
-                        </Badge>
-                      </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* 營業時間 */}
+              <div className="lg:col-span-1">
+                <BusinessHours />
+              </div>
+            </div>
           </TabsContent>
 
           {/* 預約管理 */}

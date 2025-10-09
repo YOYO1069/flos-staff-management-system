@@ -118,3 +118,176 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* 響應式設計 - 手機、平板、電腦最佳化 */
+@layer utilities {
+  /* 手機優先設計 */
+  .mobile-first {
+    @apply px-4 py-2;
+  }
+  
+  /* 平板適配 */
+  @media (min-width: 768px) {
+    .mobile-first {
+      @apply px-6 py-4;
+    }
+  }
+  
+  /* 電腦適配 */
+  @media (min-width: 1024px) {
+    .mobile-first {
+      @apply px-8 py-6;
+    }
+  }
+  
+  /* 響應式網格 */
+  .responsive-grid {
+    @apply grid grid-cols-1 gap-4;
+  }
+  
+  @media (min-width: 640px) {
+    .responsive-grid {
+      @apply grid-cols-2 gap-6;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .responsive-grid {
+      @apply grid-cols-3 gap-8;
+    }
+  }
+  
+  /* 響應式文字 */
+  .responsive-text {
+    @apply text-sm;
+  }
+  
+  @media (min-width: 768px) {
+    .responsive-text {
+      @apply text-base;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .responsive-text {
+      @apply text-lg;
+    }
+  }
+  
+  /* 響應式標題 */
+  .responsive-title {
+    @apply text-lg font-semibold;
+  }
+  
+  @media (min-width: 768px) {
+    .responsive-title {
+      @apply text-xl;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .responsive-title {
+      @apply text-2xl;
+    }
+  }
+  
+  /* 響應式按鈕 */
+  .responsive-button {
+    @apply px-3 py-2 text-sm;
+  }
+  
+  @media (min-width: 768px) {
+    .responsive-button {
+      @apply px-4 py-2 text-base;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .responsive-button {
+      @apply px-6 py-3 text-lg;
+    }
+  }
+  
+  /* 響應式卡片 */
+  .responsive-card {
+    @apply p-4 rounded-lg;
+  }
+  
+  @media (min-width: 768px) {
+    .responsive-card {
+      @apply p-6 rounded-xl;
+    }
+  }
+  
+  @media (min-width: 1024px) {
+    .responsive-card {
+      @apply p-8 rounded-2xl;
+    }
+  }
+}
+
+/* 手機裝置特殊優化 */
+@media (max-width: 640px) {
+  /* 隱藏不必要的元素 */
+  .mobile-hidden {
+    @apply hidden;
+  }
+  
+  /* 全寬度按鈕 */
+  .mobile-full-width {
+    @apply w-full;
+  }
+  
+  /* 垂直堆疊 */
+  .mobile-stack {
+    @apply flex-col space-y-2 space-x-0;
+  }
+  
+  /* 較小的間距 */
+  .mobile-compact {
+    @apply space-y-2;
+  }
+}
+
+/* 平板裝置優化 */
+@media (min-width: 641px) and (max-width: 1023px) {
+  .tablet-optimized {
+    @apply grid-cols-2 gap-4;
+  }
+}
+
+/* 大螢幕優化 */
+@media (min-width: 1024px) {
+  .desktop-optimized {
+    @apply grid-cols-3 gap-6;
+  }
+  
+  /* 側邊欄佈局 */
+  .desktop-sidebar {
+    @apply flex;
+  }
+  
+  .desktop-sidebar-content {
+    @apply flex-1 ml-64;
+  }
+}
+
+/* 觸控友善設計 */
+@media (hover: none) and (pointer: coarse) {
+  /* 增大觸控目標 */
+  .touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
+  
+  /* 移除hover效果 */
+  .no-hover {
+    @apply hover:bg-transparent;
+  }
+}
+
+/* 高解析度螢幕優化 */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .high-dpi {
+    @apply text-sm;
+  }
+}
