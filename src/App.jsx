@@ -1,18 +1,29 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button.jsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.jsx'
-import { Calendar, Users, Activity, BarChart3, Settings, Clock, UserCheck, TrendingUp, AlertCircle } from 'lucide-react'
+import { Calendar, Users, Activity, BarChart3, Settings, Clock, UserCheck, TrendingUp, AlertCircle, FileText } from 'lucide-react'
+import LoadingScreen from './components/LoadingScreen.jsx'
 import AppointmentManagement from './components/AppointmentManagement.jsx'
 import CustomerManagement from './components/CustomerManagement.jsx'
 import ConsentFormManagement from './components/ConsentFormManagement.jsx'
 import MedicalTeamScheduling from './components/MedicalTeamScheduling.jsx'
 import SchedulingSystem from './components/SchedulingSystem.jsx'
+import PatientRecordManagement from './components/PatientRecordManagement.jsx'
 import './App.css'
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard')
+  const [isLoading, setIsLoading] = useState(true)
+
+  const handleLoadingComplete = () => {
+    setIsLoading(false)
+  }
+
+  if (isLoading) {
+    return <LoadingScreen onLoadingComplete={handleLoadingComplete} />
+  }
 
   // 真實FLOS數據
   const dashboardStats = {
@@ -98,7 +109,7 @@ function App() {
       <main className="container mx-auto px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {/* 標籤導航 */}
-          <TabsList className="grid w-full grid-cols-7 bg-slate-800/50 border border-slate-700">
+          <TabsList className="grid w-full grid-cols-8 bg-slate-800/50 border border-slate-700">
             <TabsTrigger value="dashboard" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <BarChart3 className="w-4 h-4 mr-2" />
               儀表板
@@ -110,6 +121,10 @@ function App() {
             <TabsTrigger value="customers" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <Users className="w-4 h-4 mr-2" />
               客戶管理
+            </TabsTrigger>
+            <TabsTrigger value="patients" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <FileText className="w-4 h-4 mr-2" />
+              病例管理
             </TabsTrigger>
             <TabsTrigger value="staff" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <UserCheck className="w-4 h-4 mr-2" />
@@ -234,6 +249,11 @@ function App() {
           {/* 客戶管理 */}
           <TabsContent value="customers" className="space-y-6">
             <CustomerManagement />
+          </TabsContent>
+
+          {/* 病例管理 */}
+          <TabsContent value="patients" className="space-y-6">
+            <PatientRecordManagement />
           </TabsContent>
 
           {/* 員工管理 */}

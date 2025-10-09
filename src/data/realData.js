@@ -27,14 +27,55 @@ export const realStaff = [
 ];
 
 export const realReferralSources = [
+  // 基本來源管道
   { source: 'Google搜尋', count: 0, percentage: 0 },
   { source: 'Facebook', count: 0, percentage: 0 },
   { source: 'Instagram', count: 0, percentage: 0 },
   { source: 'LINE', count: 0, percentage: 0 },
   { source: '親友推薦', count: 0, percentage: 0 },
-  { source: '醫師介紹', count: 0, percentage: 0 },
-  { source: '員工推薦', count: 0, percentage: 0 },
+  
+  // 團購主
+  { source: '團購主-椏喬', count: 0, percentage: 0 },
+  { source: '團購主-怡卉', count: 0, percentage: 0 },
+  { source: '團購主-射後不理', count: 0, percentage: 0 },
+  
+  // 醫師推薦
+  { source: '醫師-鍾曜任', count: 0, percentage: 0 },
+  { source: '醫師-蔡秉遑', count: 0, percentage: 0 },
+  { source: '醫師-藍子軒', count: 0, percentage: 0 },
+  { source: '醫師-黃俊堯', count: 0, percentage: 0 },
+  { source: '醫師-伍詠聰', count: 0, percentage: 0 },
+  { source: '醫師-盧仕鈞', count: 0, percentage: 0 },
+  { source: '醫師-林思宇', count: 0, percentage: 0 },
+  { source: '醫師-王昱淞', count: 0, percentage: 0 },
+  { source: '醫師-何逸群', count: 0, percentage: 0 },
+  { source: '醫師-郭昌𣿰', count: 0, percentage: 0 },
+  
+  // 員工推薦
+  { source: '員工-萬晴', count: 0, percentage: 0 },
+  { source: '員工-陳韻安', count: 0, percentage: 0 },
+  { source: '員工-劉哲軒', count: 0, percentage: 0 },
+  { source: '員工-李文華', count: 0, percentage: 0 },
+  { source: '員工-張耿齊', count: 0, percentage: 0 },
+  { source: '員工-洪揚程', count: 0, percentage: 0 },
+  { source: '員工-謝鏵翧', count: 0, percentage: 0 },
+  { source: '員工-黃璦瑄', count: 0, percentage: 0 },
+  { source: '員工-王筑句', count: 0, percentage: 0 },
+  
   { source: '其他', count: 0, percentage: 0 }
+];
+
+// 來源備註選項
+export const sourceNoteOptions = [
+  '無',
+  '團購活動',
+  '特殊優惠',
+  '朋友介紹',
+  '網路廣告',
+  '社群媒體',
+  '口碑推薦',
+  '回頭客',
+  '其他'
 ];
 
 export const realTreatments = [
