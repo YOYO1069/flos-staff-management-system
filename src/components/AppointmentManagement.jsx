@@ -10,8 +10,9 @@ import { Plus, Download, RefreshCw, Edit, Trash2 } from 'lucide-react'
 import { supabase } from '@/lib/supabase.js'
 import * as XLSX from 'xlsx'
 
-const AppointmentManagement = () => {
+const AppointmentManagement = ({ onAppointmentUpdate }) => {
   const [appointments, setAppointments] = useState([])
+  const [todayAppointments, setTodayAppointments] = useState([])
   const [loading, setLoading] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingId, setEditingId] = useState(null)
@@ -55,6 +56,12 @@ const AppointmentManagement = () => {
       
       console.log('載入預約數量:', data?.length || 0)
       setAppointments(data || [])
+      const today = new Date().toISOString().split("T")[0]
+      const todayApts = data.filter(apt => apt.date === today)
+      setTodayAppointments(todayApts)
+      if (onAppointmentUpdate) {
+        onAppointmentUpdate(todayApts.length, data.length)
+      }
     } catch (error) {
       console.error('載入預約失敗:', error)
       alert('載入預約資料失敗：' + error.message)
@@ -236,7 +243,9 @@ const AppointmentManagement = () => {
   }
 
   // 篩選當日預約
-  const todayAppointments = appointments.filter(apt => apt.date === selectedDate)
+
+
+  const filteredAppointments = appointments.filter(apt => apt.date === selectedDate)
 
   return (
     <div className="space-y-6 p-6">

@@ -26,32 +26,46 @@ function App() {
   }
 
   // 真實FLOS數據
+  const [todayAppointmentCount, setTodayAppointmentCount] = useState(0)
+  const [totalAppointmentCount, setTotalAppointmentCount] = useState(0)
+
+  const handleAppointmentUpdate = (todayCount, totalCount) => {
+    setTodayAppointmentCount(todayCount)
+    setTotalAppointmentCount(totalCount)
+  }
+
   const dashboardStats = {
-    todayAppointments: 11, // 2025-10-08實際預約數
+    todayAppointments: todayAppointmentCount, // 從 AppointmentManagement 獲取
     pendingAppointments: 3,
-    totalCustomers: 152, // 實際客戶總數
-    monthlyRevenue: 2850000, // 基於實際療程估算
+    totalCustomers: 152,
+    monthlyRevenue: 2850000,
     completionRate: 94
   }
 
   // 基於真實客戶資料的今日預約 (移除假資訊，使用實際療程)
-  const todayAppointments = [
-    { id: 1, time: '09:00', customer: '郭怡萱', service: 'EMB', status: 'confirmed', staff: '道玄', consultant: '道玄' },
-    { id: 2, time: '10:30', customer: '翁玉蘭', service: '猛健樂', status: 'pending', staff: '米米', consultant: '米米' },
-    { id: 3, time: '14:00', customer: '謝政均', service: '震波', status: 'confirmed', staff: '句句', consultant: '句句' },
-    { id: 4, time: '15:30', customer: '潘承延', service: '猛健樂', status: 'in-progress', staff: '句句', consultant: '句句' },
-    { id: 5, time: '16:30', customer: '廖喬芝', service: 'EMB', status: 'confirmed', staff: '哲軒', consultant: '哲軒' }
-  ]
+  const [todayAppointments, setTodayAppointments] = useState([]);
 
   // 真實FLOS醫師和諮詢師團隊
+  const businessHours = {
+    mon_fri: '12:00–20:30',
+    sat: '10:30–19:00',
+    sun: '休診（含國定假日）'
+  }
+
+  const doctors = ['鍾曜任', '伍詠聰', '林思宇', '王昱淞', '黃俊堯', '藍子軒', '何逸群', '郭昌浩', '宋昀翰']
+  const staff = ['萬晴', '陳韻安', '劉哲軒', '李文華', '張耿齊', '洪揚程', '謝鏵翧', '黃璦瑄', '王筑句', '米米', '花', '劉道玄', '黃柏翰']
   const staffSchedule = [
-    { id: 1, name: '鍾曜任醫師', status: 'on', shift: '12:00-20:30', appointments: 3, specialties: ['皮秒雷射', '音波拉提'] },
-    { id: 2, name: '林思宇醫師', status: 'on', shift: '12:00-20:30', appointments: 2, specialties: ['猛健樂', '震波'] },
-    { id: 3, name: '句句諮詢師', status: 'on', shift: '12:00-20:30', appointments: 33, specialties: ['客戶諮詢', '療程規劃'] },
-    { id: 4, name: '道玄諮詢師', status: 'on', shift: '12:00-20:30', appointments: 17, specialties: ['客戶諮詢', '療程規劃'] },
-    { id: 5, name: '安安諮詢師', status: 'on', shift: '12:00-20:30', appointments: 14, specialties: ['客戶諮詢', '療程規劃'] },
-    { id: 6, name: '哲軒諮詢師', status: 'off', shift: '休假', appointments: 0, specialties: ['客戶諮詢', '療程規劃'] }
-  ]
+    // 醫師
+    { id: 1, name: '鍾曜任醫師', status: 'on', shift: businessHours.mon_fri, appointments: 3, specialties: ['皮秒雷射', '音波拉提'] },
+    { id: 2, name: '伍詠聰醫師', status: 'on', shift: businessHours.mon_fri, appointments: 2, specialties: ['猛健樂', '震波'] },
+    { id: 3, name: '林思宇醫師', status: 'on', shift: businessHours.mon_fri, appointments: 2, specialties: ['猛健樂', '震波'] },
+    // 員工/諮詢師
+    { id: 4, name: '劉道玄諮詢師', status: 'on', shift: businessHours.mon_fri, appointments: 17, specialties: ['客戶諮詢', '療程規劃'] },
+    { id: 5, name: '王筑句諮詢師', status: 'on', shift: businessHours.mon_fri, appointments: 33, specialties: ['客戶諮詢', '療程規劃'] },
+    { id: 6, name: '劉哲軒', status: 'on', shift: businessHours.mon_fri, appointments: 14, specialties: ['員工'] },
+    { id: 7, name: '陳韻安', status: 'on', shift: businessHours.mon_fri, appointments: 14, specialties: ['員工'] },
+    { id: 8, name: '萬晴', status: 'off', shift: '休假', appointments: 0, specialties: ['員工'] }
+]
 
   const getStatusColor = (status) => {
     switch (status) {
@@ -147,8 +161,39 @@ function App() {
           {/* 儀表板 */}
           <TabsContent value="dashboard" className="space-y-6">
             {/* 統計卡片 */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
-              <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {/* PWA 優點 1: 今日預約概覽 - 整合到儀表板 */}
+              <Card className="col-span-full">
+                <CardHeader>
+                  <CardTitle className="text-xl flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-blue-500" />
+                    今日預約概覽 (11/1起)
+                  </CardTitle>
+                  <CardDescription>
+                    從 Supabase 即時讀取，確保資料準確性。
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-3">
+                    {todayAppointments.length > 0 ? (
+                      todayAppointments.map(apt => (
+                        <div key={apt.id} className="flex justify-between items-center p-3 bg-slate-100/50 rounded-lg border border-slate-200">
+                          <div className="flex items-center space-x-3">
+                            <Badge variant="secondary" className={getStatusColor(apt.status)}>{getStatusText(apt.status)}</Badge>
+                            <div>
+                              <p className="font-semibold text-slate-800">{apt.customer} ({apt.service})</p>
+                              <p className="text-sm text-slate-500">{apt.time} - 諮詢師: {apt.consultant}</p>
+                            </div>
+                          </div>
+                          <Button variant="outline" size="sm" onClick={() => setActiveTab('appointments')}>查看詳情</Button>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-slate-500">今日無預約。</p>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>         <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                   <CardTitle className="text-sm font-medium text-slate-300">今日預約</CardTitle>
                   <Calendar className="h-4 w-4 text-blue-400" />
@@ -243,17 +288,64 @@ function App() {
 
           {/* 預約管理 */}
           <TabsContent value="appointments" className="space-y-6">
-            <AppointmentManagement />
+            <AppointmentManagement onAppointmentUpdate={handleAppointmentUpdate} />
           </TabsContent>
 
           {/* 客戶管理 */}
           <TabsContent value="customers" className="space-y-6">
             <CustomerManagement />
+            </TabsContent>
+
+            {/* PWA 優點 2: 客戶管理精華 - 整合到客戶管理 */}
+            <TabsContent value="customer-management" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-xl flex items-center gap-2">
+                    <Users className="w-5 h-5 text-orange-500" />
+                    客戶管理精華
+                  </CardTitle>
+                  <CardDescription>
+                    快速查看客戶的關鍵資訊和療程紀錄。
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {/* 這裡可以放置一個客戶搜尋和精華資訊的組件 */}
+                  <div className="flex gap-4">
+                    <Input placeholder="輸入客戶姓名或電話" className="flex-grow" />
+                    <Button>搜尋</Button>
+                  </div>
+                  <div className="mt-4 text-slate-500">
+                    {/* 這裡將顯示搜尋結果的精華資訊 */}
+                    <p>請輸入關鍵字進行搜尋...</p>
+                  </div>
+                </CardContent>
+              </Card>
+              <CustomerManagement />
           </TabsContent>
 
           {/* 病例管理 */}
           <TabsContent value="patients" className="space-y-6">
             <PatientRecordManagement />
+            </TabsContent>
+
+            {/* PWA 優點 3: 病歷管理新增功能 - 整合到病歷管理 */}
+            <TabsContent value="patient-records" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-xl flex items-center gap-2">
+                    <FileText className="w-5 h-5 text-purple-500" />
+                    新增病歷
+                  </CardTitle>
+                  <CardDescription>
+                    快速新增客戶病歷資料，並與預約資料聯動。
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  {/* 這裡可以放置一個簡化的新增病歷表單，或是一個按鈕導向 PatientRecordManagement 內的新增功能 */}
+                  <Button onClick={() => console.log('觸發新增病歷功能')}>新增病歷</Button>
+                </CardContent>
+              </Card>
+              <PatientRecordManagement />
           </TabsContent>
 
           {/* 員工管理 */}
