@@ -1,484 +1,380 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button.jsx'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.jsx'
-import { Badge } from '@/components/ui/badge.jsx'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { Input } from '@/components/ui/input.jsx'
 import { Label } from '@/components/ui/label.jsx'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select.jsx'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog.jsx'
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog.jsx'
 import { Textarea } from '@/components/ui/textarea.jsx'
-import { Calendar, Clock, Plus, Search, Filter, Edit, Trash2, Phone, Mail } from 'lucide-react'
+import { Calendar, Plus, Download, RefreshCw } from 'lucide-react'
+import { supabase } from '@/lib/supabase.js'
+import * as XLSX from 'xlsx'
 
 const AppointmentManagement = () => {
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
-  const [viewMode, setViewMode] = useState('calendar') // calendar, list, timeline
-  const [searchTerm, setSearchTerm] = useState('')
-  const [filterStatus, setFilterStatus] = useState('all')
+  const [appointments, setAppointments] = useState([])
+  const [loading, setLoading] = useState(false)
   const [isNewAppointmentOpen, setIsNewAppointmentOpen] = useState(false)
-
-  // 模擬預約資料
-  const appointments = [
-    {
-      id: 1,
-      date: '2025-10-09',
-      time: '09:00',
-      endTime: '10:00',
-      customer: { name: '王小美', phone: '0912-345-678', email: 'wang@example.com' },
-      service: '皮秒雷射',
-      staff: '李醫師',
-      status: 'confirmed',
-      notes: '首次療程，需要詳細說明',
-      duration: 60
-    },
-    {
-      id: 2,
-      date: '2025-10-09',
-      time: '10:30',
-      endTime: '11:00',
-      customer: { name: '陳先生', phone: '0923-456-789', email: 'chen@example.com' },
-      service: '玻尿酸注射',
-      staff: '張護理師',
-      status: 'pending',
-      notes: '需要過敏測試',
-      duration: 30
-    },
-    {
-      id: 3,
-      date: '2025-10-09',
-      time: '14:00',
-      endTime: '15:30',
-      customer: { name: '林小姐', phone: '0934-567-890', email: 'lin@example.com' },
-      service: '電波拉皮',
-      staff: '李醫師',
-      status: 'confirmed',
-      notes: '回診客戶',
-      duration: 90
-    },
-    {
-      id: 4,
-      date: '2025-10-09',
-      time: '15:30',
-      endTime: '16:30',
-      customer: { name: '黃太太', phone: '0945-678-901', email: 'huang@example.com' },
-      service: '音波拉提',
-      staff: '王醫師',
-      status: 'in-progress',
-      notes: '進行中',
-      duration: 60
-    },
-    {
-      id: 5,
-      date: '2025-10-09',
-      time: '16:30',
-      endTime: '17:00',
-      customer: { name: '劉小姐', phone: '0956-789-012', email: 'liu@example.com' },
-      service: '肉毒桿菌',
-      staff: '張護理師',
-      status: 'confirmed',
-      notes: '定期保養',
-      duration: 30
-    },
-    // 添加一些時間衝突的預約來測試重複預約處理
-    {
-      id: 6,
-      date: '2025-10-09',
-      time: '15:30',
-      endTime: '16:00',
-      customer: { name: '趙小姐', phone: '0967-890-123', email: 'zhao@example.com' },
-      service: '雷射除毛',
-      staff: '陳護理師',
-      status: 'confirmed',
-      notes: '時間衝突但保留記錄',
-      duration: 30
-    }
-  ]
-
-  const services = [
-    { id: 1, name: '皮秒雷射', duration: 60, category: '雷射療程' },
-    { id: 2, name: '玻尿酸注射', duration: 30, category: '注射療程' },
-    { id: 3, name: '肉毒桿菌', duration: 20, category: '注射療程' },
-    { id: 4, name: '電波拉皮', duration: 90, category: '拉提療程' },
-    { id: 5, name: '音波拉提', duration: 60, category: '拉提療程' },
-    { id: 6, name: '雷射除毛', duration: 45, category: '雷射療程' }
-  ]
-
-  const staff = [
-    { id: 1, name: '李醫師', specialties: ['皮秒雷射', '電波拉皮'] },
-    { id: 2, name: '王醫師', specialties: ['音波拉提', '玻尿酸'] },
-    { id: 3, name: '張護理師', specialties: ['注射療程', '術後護理'] },
-    { id: 4, name: '陳護理師', specialties: ['雷射除毛', '術後護理'] }
-  ]
-
-  const timeSlots = [
-    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-    '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
-    '15:00', '15:30', '16:00', '16:30', '17:00', '17:30',
-    '18:00', '18:30', '19:00'
-  ]
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case 'confirmed': return 'bg-green-100 text-green-800 border-green-200'
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'in-progress': return 'bg-blue-100 text-blue-800 border-blue-200'
-      case 'completed': return 'bg-gray-100 text-gray-800 border-gray-200'
-      case 'cancelled': return 'bg-red-100 text-red-800 border-red-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
-    }
-  }
-
-  const getStatusText = (status) => {
-    switch (status) {
-      case 'confirmed': return '已確認'
-      case 'pending': return '待確認'
-      case 'in-progress': return '進行中'
-      case 'completed': return '已完成'
-      case 'cancelled': return '已取消'
-      default: return '未知'
-    }
-  }
-
-  const filteredAppointments = appointments.filter(appointment => {
-    const matchesSearch = appointment.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         appointment.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         appointment.staff.toLowerCase().includes(searchTerm.toLowerCase())
-    const matchesStatus = filterStatus === 'all' || appointment.status === filterStatus
-    const matchesDate = appointment.date === selectedDate
-    return matchesSearch && matchesStatus && matchesDate
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0])
+  
+  // 新增預約表單 - 完全符合 EXCEL 16 個欄位
+  const [form, setForm] = useState({
+    date: new Date().toISOString().split('T')[0],
+    time: '',
+    patient_name: '',
+    birthday: '',
+    phone: '',
+    treatment: '',
+    room: '',
+    equipment: '',
+    source: '',
+    status: '尚未報到',
+    consultant: '',
+    staff: '',
+    doctor: '',
+    duration: '',
+    notes: ''
   })
 
-  // 檢測時間衝突
-  const getConflictingAppointments = (time, excludeId = null) => {
-    return appointments.filter(apt => 
-      apt.date === selectedDate && 
-      apt.time === time && 
-      apt.id !== excludeId
-    )
+  // 載入預約資料
+  const loadAppointments = async () => {
+    setLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from('flos_appointments')
+        .select('*')
+        .gte('date', '2025-11-01')  // 只顯示 11/1 之後的資料
+        .order('date', { ascending: true })
+        .order('time', { ascending: true })
+
+      if (error) throw error
+      setAppointments(data || [])
+    } catch (error) {
+      console.error('載入預約失敗:', error)
+      alert('載入預約資料失敗：' + error.message)
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const renderCalendarView = () => {
-    return (
-      <div className="space-y-4">
-        {/* 時間軸視圖 */}
-        <div className="bg-slate-700/30 rounded-lg p-4">
-          <div className="grid grid-cols-1 gap-2">
-            {timeSlots.map(time => {
-              const appointmentsAtTime = filteredAppointments.filter(apt => apt.time === time)
-              const conflicts = getConflictingAppointments(time)
-              
-              return (
-                <div key={time} className="flex items-center space-x-4 p-2 border-b border-slate-600 last:border-b-0">
-                  <div className="w-16 text-sm font-medium text-blue-400 flex-shrink-0">
-                    {time}
-                  </div>
-                  <div className="flex-1 min-h-[40px] flex items-center">
-                    {appointmentsAtTime.length > 0 ? (
-                      <div className="flex flex-wrap gap-2 w-full">
-                        {appointmentsAtTime.map(appointment => (
-                          <div
-                            key={appointment.id}
-                            className={`flex-1 min-w-[200px] p-2 rounded border ${
-                              conflicts.length > 1 ? 'ring-2 ring-orange-400' : ''
-                            }`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div className="flex-1">
-                                <div className="font-medium text-white text-sm">
-                                  {appointment.customer.name}
-                                </div>
-                                <div className="text-xs text-slate-400">
-                                  {appointment.service} • {appointment.staff}
-                                </div>
-                                {conflicts.length > 1 && (
-                                  <div className="text-xs text-orange-400 mt-1">
-                                    ⚠️ 時間衝突 ({conflicts.length}筆預約)
-                                  </div>
-                                )}
-                              </div>
-                              <div className="flex items-center space-x-2">
-                                <Badge className={getStatusColor(appointment.status)}>
-                                  {getStatusText(appointment.status)}
-                                </Badge>
-                                <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
-                                  <Edit className="w-3 h-3" />
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="text-slate-500 text-sm italic">
-                        無預約
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      </div>
-    )
+  useEffect(() => {
+    loadAppointments()
+  }, [])
+
+  // 新增預約
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    
+    if (!form.date || !form.time || !form.patient_name) {
+      alert('日期、時間和客戶姓名為必填項目')
+      return
+    }
+
+    try {
+      const appointmentData = {
+        id: `${Date.now()}${Math.random().toString(36).substr(2, 9)}`,
+        date: form.date,
+        time: form.time,
+        patient_name: form.patient_name,
+        birthday: form.birthday || null,
+        phone: form.phone || null,
+        treatment: form.treatment || null,
+        room: form.room || null,
+        equipment: form.equipment || null,
+        source: form.source || null,
+        status: form.status || '尚未報到',
+        consultant: form.consultant || null,
+        staff: form.staff || null,
+        doctor: form.doctor || null,
+        duration: form.duration || null,
+        notes: form.notes || null
+      }
+
+      const { error } = await supabase
+        .from('flos_appointments')
+        .insert([appointmentData])
+
+      if (error) throw error
+
+      alert('預約新增成功！')
+      setIsNewAppointmentOpen(false)
+      setForm({
+        date: new Date().toISOString().split('T')[0],
+        time: '',
+        patient_name: '',
+        birthday: '',
+        phone: '',
+        treatment: '',
+        room: '',
+        equipment: '',
+        source: '',
+        status: '尚未報到',
+        consultant: '',
+        staff: '',
+        doctor: '',
+        duration: '',
+        notes: ''
+      })
+      loadAppointments()
+    } catch (error) {
+      console.error('新增預約失敗:', error)
+      alert('新增預約失敗：' + error.message)
+    }
   }
 
-  const renderListView = () => {
-    return (
-      <div className="space-y-4">
-        {filteredAppointments.map(appointment => {
-          const conflicts = getConflictingAppointments(appointment.time, appointment.id)
-          
-          return (
-            <Card key={appointment.id} className={`bg-slate-700/30 border-slate-600 ${
-              conflicts.length > 0 ? 'ring-2 ring-orange-400' : ''
-            }`}>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="text-blue-400 font-medium">
-                      {appointment.time} - {appointment.endTime}
-                    </div>
-                    <div>
-                      <div className="font-medium text-white">{appointment.customer.name}</div>
-                      <div className="text-sm text-slate-400">{appointment.service}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-3">
-                    <div className="text-right">
-                      <div className="text-sm text-slate-300">{appointment.staff}</div>
-                      <div className="text-xs text-slate-400">{appointment.duration}分鐘</div>
-                    </div>
-                    <Badge className={getStatusColor(appointment.status)}>
-                      {getStatusText(appointment.status)}
-                    </Badge>
-                    <div className="flex space-x-1">
-                      <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
-                        <Phone className="w-3 h-3" />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
-                        <Mail className="w-3 h-3" />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="text-slate-400 hover:text-white">
-                        <Edit className="w-3 h-3" />
-                      </Button>
-                      <Button variant="ghost" size="sm" className="text-slate-400 hover:text-red-400">
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-                {appointment.notes && (
-                  <div className="mt-2 text-sm text-slate-400 bg-slate-800/50 p-2 rounded">
-                    備註: {appointment.notes}
-                  </div>
-                )}
-                {conflicts.length > 0 && (
-                  <div className="mt-2 p-2 bg-orange-900/20 border border-orange-400/30 rounded">
-                    <div className="text-xs text-orange-400">
-                      ⚠️ 檢測到時間衝突，但已保留所有預約記錄 ({conflicts.length + 1}筆預約在同一時段)
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          )
-        })}
-      </div>
-    )
+  // 匯出 EXCEL - 完全符合範本格式
+  const exportToExcel = () => {
+    const excelData = appointments.map(apt => ({
+      '台灣日期': apt.date,
+      '時間(24H制)': apt.time,
+      '客戶姓名': apt.patient_name,
+      '客户生日': apt.birthday || '',
+      '聯絡電話': apt.phone || '',
+      '醫美療程項目': apt.treatment || '',
+      '使用房間': apt.room || '',
+      '使用設備': apt.equipment || '',
+      '客戶來源': apt.source || '',
+      '預約狀態': apt.status || '',
+      '資料來源': apt.source || '',
+      '諮詢師': apt.consultant || '',
+      '跟診人員': apt.staff || '',
+      '主治醫師': apt.doctor || '',
+      '療程時間(小時)': apt.duration || '',
+      '備註': apt.notes || ''
+    }))
+
+    const ws = XLSX.utils.json_to_sheet(excelData)
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, '預約資料')
+    
+    const fileName = `FLOS預約資料_${new Date().toISOString().split('T')[0]}.xlsx`
+    XLSX.writeFile(wb, fileName)
   }
+
+  // 今日預約
+  const todayAppointments = appointments.filter(apt => apt.date === selectedDate)
 
   return (
-    <div className="space-y-6">
-      {/* 控制面板 */}
-      <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
+    <div className="space-y-6 p-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">預約管理</h1>
+        <div className="flex gap-2">
+          <Button onClick={loadAppointments} variant="outline">
+            <RefreshCw className="w-4 h-4 mr-2" />
+            重新整理
+          </Button>
+          <Button onClick={exportToExcel} variant="outline">
+            <Download className="w-4 h-4 mr-2" />
+            匯出 EXCEL
+          </Button>
+          <Button onClick={() => setIsNewAppointmentOpen(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            新增預約
+          </Button>
+        </div>
+      </div>
+
+      {/* 日期選擇 */}
+      <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <CardTitle className="text-white flex items-center">
-                <Calendar className="w-5 h-5 mr-2 text-blue-400" />
-                預約管理中心
-              </CardTitle>
-              <CardDescription className="text-slate-400">
-                管理所有預約，支援時間衝突檢測和批量操作
-              </CardDescription>
-            </div>
-            <Dialog open={isNewAppointmentOpen} onOpenChange={setIsNewAppointmentOpen}>
-              <DialogTrigger asChild>
-                <Button className="bg-blue-600 hover:bg-blue-700">
-                  <Plus className="w-4 h-4 mr-2" />
-                  新增預約
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="bg-slate-800 border-slate-700 text-white max-w-2xl">
-                <DialogHeader>
-                  <DialogTitle>建立新預約</DialogTitle>
-                  <DialogDescription className="text-slate-400">
-                    填寫預約詳細資訊
-                  </DialogDescription>
-                </DialogHeader>
-                <div className="grid grid-cols-2 gap-4 py-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="customer-name">客戶姓名</Label>
-                    <Input id="customer-name" placeholder="請輸入客戶姓名" className="bg-slate-700 border-slate-600" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="customer-phone">聯絡電話</Label>
-                    <Input id="customer-phone" placeholder="請輸入聯絡電話" className="bg-slate-700 border-slate-600" />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="service">療程項目</Label>
-                    <Select>
-                      <SelectTrigger className="bg-slate-700 border-slate-600">
-                        <SelectValue placeholder="選擇療程" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-700 border-slate-600">
-                        {services.map(service => (
-                          <SelectItem key={service.id} value={service.name}>
-                            {service.name} ({service.duration}分鐘)
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="staff">負責人員</Label>
-                    <Select>
-                      <SelectTrigger className="bg-slate-700 border-slate-600">
-                        <SelectValue placeholder="選擇人員" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-700 border-slate-600">
-                        {staff.map(member => (
-                          <SelectItem key={member.id} value={member.name}>
-                            {member.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="date">預約日期</Label>
-                    <Input 
-                      id="date" 
-                      type="date" 
-                      value={selectedDate}
-                      onChange={(e) => setSelectedDate(e.target.value)}
-                      className="bg-slate-700 border-slate-600" 
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="time">預約時間</Label>
-                    <Select>
-                      <SelectTrigger className="bg-slate-700 border-slate-600">
-                        <SelectValue placeholder="選擇時間" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-slate-700 border-slate-600">
-                        {timeSlots.map(time => (
-                          <SelectItem key={time} value={time}>
-                            {time}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="col-span-2 space-y-2">
-                    <Label htmlFor="notes">備註</Label>
-                    <Textarea 
-                      id="notes" 
-                      placeholder="請輸入備註資訊" 
-                      className="bg-slate-700 border-slate-600"
-                      rows={3}
-                    />
-                  </div>
-                </div>
-                <div className="flex justify-end space-x-2">
-                  <Button variant="outline" onClick={() => setIsNewAppointmentOpen(false)}>
-                    取消
-                  </Button>
-                  <Button className="bg-blue-600 hover:bg-blue-700">
-                    建立預約
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
+          <CardTitle>選擇日期</CardTitle>
         </CardHeader>
         <CardContent>
-          {/* 篩選和搜尋 */}
-          <div className="flex flex-col md:flex-row gap-4 mb-6">
-            <div className="flex-1">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+          <Input
+            type="date"
+            value={selectedDate}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            className="max-w-xs"
+          />
+        </CardContent>
+      </Card>
+
+      {/* 預約列表 */}
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            {selectedDate} 的預約 ({todayAppointments.length} 筆)
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          {loading ? (
+            <div className="text-center py-8">載入中...</div>
+          ) : todayAppointments.length === 0 ? (
+            <div className="text-center py-8 text-gray-500">本日無預約</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border p-2 text-left">時間</th>
+                    <th className="border p-2 text-left">客戶姓名</th>
+                    <th className="border p-2 text-left">聯絡電話</th>
+                    <th className="border p-2 text-left">療程項目</th>
+                    <th className="border p-2 text-left">使用房間</th>
+                    <th className="border p-2 text-left">諮詢師</th>
+                    <th className="border p-2 text-left">預約狀態</th>
+                    <th className="border p-2 text-left">備註</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {todayAppointments.map((apt) => (
+                    <tr key={apt.id} className="hover:bg-gray-50">
+                      <td className="border p-2">{apt.time}</td>
+                      <td className="border p-2 font-medium">{apt.patient_name}</td>
+                      <td className="border p-2">{apt.phone || '-'}</td>
+                      <td className="border p-2">{apt.treatment || '-'}</td>
+                      <td className="border p-2">{apt.room || '-'}</td>
+                      <td className="border p-2">{apt.consultant || '-'}</td>
+                      <td className="border p-2">{apt.status || '-'}</td>
+                      <td className="border p-2">{apt.notes || '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* 新增預約對話框 */}
+      <Dialog open={isNewAppointmentOpen} onOpenChange={setIsNewAppointmentOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>新增預約</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <Label>日期 *</Label>
                 <Input
-                  placeholder="搜尋客戶姓名、療程或員工..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 bg-slate-700 border-slate-600 text-white"
+                  type="date"
+                  value={form.date}
+                  onChange={(e) => setForm({ ...form, date: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <Label>時間 *</Label>
+                <Input
+                  type="time"
+                  value={form.time}
+                  onChange={(e) => setForm({ ...form, time: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <Label>客戶姓名 *</Label>
+                <Input
+                  value={form.patient_name}
+                  onChange={(e) => setForm({ ...form, patient_name: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <Label>客戶生日</Label>
+                <Input
+                  type="date"
+                  value={form.birthday}
+                  onChange={(e) => setForm({ ...form, birthday: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>聯絡電話</Label>
+                <Input
+                  value={form.phone}
+                  onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>醫美療程項目</Label>
+                <Input
+                  value={form.treatment}
+                  onChange={(e) => setForm({ ...form, treatment: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>使用房間</Label>
+                <Input
+                  value={form.room}
+                  onChange={(e) => setForm({ ...form, room: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>使用設備</Label>
+                <Input
+                  value={form.equipment}
+                  onChange={(e) => setForm({ ...form, equipment: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>客戶來源</Label>
+                <Input
+                  value={form.source}
+                  onChange={(e) => setForm({ ...form, source: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>預約狀態</Label>
+                <Select value={form.status} onValueChange={(value) => setForm({ ...form, status: value })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="尚未報到">尚未報到</SelectItem>
+                    <SelectItem value="已報到">已報到</SelectItem>
+                    <SelectItem value="已確認">已確認</SelectItem>
+                    <SelectItem value="已完成">已完成</SelectItem>
+                    <SelectItem value="已取消">已取消</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label>諮詢師</Label>
+                <Input
+                  value={form.consultant}
+                  onChange={(e) => setForm({ ...form, consultant: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>跟診人員</Label>
+                <Input
+                  value={form.staff}
+                  onChange={(e) => setForm({ ...form, staff: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>主治醫師</Label>
+                <Input
+                  value={form.doctor}
+                  onChange={(e) => setForm({ ...form, doctor: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label>療程時間(小時)</Label>
+                <Input
+                  value={form.duration}
+                  onChange={(e) => setForm({ ...form, duration: e.target.value })}
+                />
+              </div>
+              <div className="col-span-3">
+                <Label>備註</Label>
+                <Textarea
+                  value={form.notes}
+                  onChange={(e) => setForm({ ...form, notes: e.target.value })}
+                  rows={2}
                 />
               </div>
             </div>
-            <div className="flex gap-2">
-              <Input
-                type="date"
-                value={selectedDate}
-                onChange={(e) => setSelectedDate(e.target.value)}
-                className="bg-slate-700 border-slate-600 text-white"
-              />
-              <Select value={filterStatus} onValueChange={setFilterStatus}>
-                <SelectTrigger className="w-32 bg-slate-700 border-slate-600">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-700 border-slate-600">
-                  <SelectItem value="all">全部狀態</SelectItem>
-                  <SelectItem value="pending">待確認</SelectItem>
-                  <SelectItem value="confirmed">已確認</SelectItem>
-                  <SelectItem value="in-progress">進行中</SelectItem>
-                  <SelectItem value="completed">已完成</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={viewMode} onValueChange={setViewMode}>
-                <SelectTrigger className="w-32 bg-slate-700 border-slate-600">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent className="bg-slate-700 border-slate-600">
-                  <SelectItem value="calendar">時間軸</SelectItem>
-                  <SelectItem value="list">列表檢視</SelectItem>
-                </SelectContent>
-              </Select>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="outline" onClick={() => setIsNewAppointmentOpen(false)}>
+                取消
+              </Button>
+              <Button type="submit">
+                新增預約
+              </Button>
             </div>
-          </div>
-
-          {/* 預約統計 */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="bg-slate-700/30 p-3 rounded-lg">
-              <div className="text-sm text-slate-400">總預約數</div>
-              <div className="text-xl font-bold text-white">{filteredAppointments.length}</div>
-            </div>
-            <div className="bg-slate-700/30 p-3 rounded-lg">
-              <div className="text-sm text-slate-400">待確認</div>
-              <div className="text-xl font-bold text-yellow-400">
-                {filteredAppointments.filter(apt => apt.status === 'pending').length}
-              </div>
-            </div>
-            <div className="bg-slate-700/30 p-3 rounded-lg">
-              <div className="text-sm text-slate-400">已確認</div>
-              <div className="text-xl font-bold text-green-400">
-                {filteredAppointments.filter(apt => apt.status === 'confirmed').length}
-              </div>
-            </div>
-            <div className="bg-slate-700/30 p-3 rounded-lg">
-              <div className="text-sm text-slate-400">時間衝突</div>
-              <div className="text-xl font-bold text-orange-400">
-                {new Set(appointments.filter(apt => 
-                  getConflictingAppointments(apt.time, apt.id).length > 0
-                ).map(apt => apt.time)).size}
-              </div>
-            </div>
-          </div>
-
-          {/* 預約檢視 */}
-          {viewMode === 'calendar' ? renderCalendarView() : renderListView()}
-        </CardContent>
-      </Card>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }

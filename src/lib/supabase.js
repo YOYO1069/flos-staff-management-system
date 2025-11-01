@@ -1,58 +1,34 @@
 // Supabase 配置 - FLOS曜診所動態資料管理
-// 使用環境變數中的Supabase配置
+import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || 'https://your-project.supabase.co'
-const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY || 'your-anon-key'
+// 使用真實的 Supabase 配置
+const supabaseUrl = 'https://clzjdlykhjwrlksyjlfz.supabase.co'
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNsempkbHlraGp3cmxrc3lqbGZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTk3OTM2ODAsImV4cCI6MjA3NTM2OTY4MH0.V6QAoh4N2aSF5CgDYfKTnY8cMQnDV3AYilj7TbpWJcU'
 
-// 模擬Supabase客戶端 (開發階段)
-export const supabase = {
-  from: (table) => ({
-    select: (columns = '*') => ({
-      eq: (column, value) => Promise.resolve({ data: [], error: null }),
-      order: (column, options) => Promise.resolve({ data: [], error: null }),
-      limit: (count) => Promise.resolve({ data: [], error: null }),
-      then: (callback) => callback({ data: [], error: null })
-    }),
-    insert: (data) => Promise.resolve({ data: null, error: null }),
-    update: (data) => ({
-      eq: (column, value) => Promise.resolve({ data: null, error: null })
-    }),
-    delete: () => ({
-      eq: (column, value) => Promise.resolve({ data: null, error: null })
-    })
-  }),
-  
-  auth: {
-    signUp: (credentials) => Promise.resolve({ data: null, error: null }),
-    signIn: (credentials) => Promise.resolve({ data: null, error: null }),
-    signOut: () => Promise.resolve({ error: null }),
-    getUser: () => Promise.resolve({ data: { user: null }, error: null })
-  },
-
-  storage: {
-    from: (bucket) => ({
-      upload: (path, file) => Promise.resolve({ data: null, error: null }),
-      download: (path) => Promise.resolve({ data: null, error: null })
-    })
-  }
-}
+// 建立 Supabase 客戶端
+export const supabase = createClient(supabaseUrl, supabaseKey)
 
 // 資料庫表格結構
 export const tables = {
-  appointments: 'appointments',
-  customers: 'customers', 
+  appointments: 'flos_appointments',  // 使用 flos_appointments 表
+  customers: 'flos_patients',
   staff: 'staff',
   doctors: 'doctors',
-  treatments: 'treatments',
+  treatments: 'flos_treatments',
   consent_forms: 'consent_forms',
   schedules: 'schedules'
 }
 
 // 即時訂閱功能
 export const subscribeToChanges = (table, callback) => {
-  // 模擬即時更新
-  console.log(`訂閱 ${table} 表格變更`)
-  return () => console.log(`取消訂閱 ${table}`)
+  const subscription = supabase
+    .channel(`public:${table}`)
+    .on('postgres_changes', { event: '*', schema: 'public', table: table }, callback)
+    .subscribe()
+
+  return () => {
+    subscription.unsubscribe()
+  }
 }
 
 export default supabase
