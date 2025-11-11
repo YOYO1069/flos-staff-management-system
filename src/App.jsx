@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button.jsx'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card.jsx'
 import { Badge } from '@/components/ui/badge.jsx'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs.jsx'
-import { Calendar, Users, Activity, BarChart3, Settings, Clock, UserCheck, TrendingUp, AlertCircle, FileText } from 'lucide-react'
+import { Calendar, Users, Activity, BarChart3, Settings, Clock, UserCheck, TrendingUp, AlertCircle, FileText, Gift } from 'lucide-react'
 import LoadingScreen from './components/LoadingScreen.jsx'
 import AppointmentManagement from './components/AppointmentManagement.jsx'
 import CustomerManagement from './components/CustomerManagement.jsx'
@@ -11,6 +11,7 @@ import ConsentFormManagement from './components/ConsentFormManagement.jsx'
 import MedicalTeamScheduling from './components/MedicalTeamScheduling.jsx'
 import SchedulingSystem from './components/SchedulingSystem.jsx'
 import PatientRecordManagement from './components/PatientRecordManagement.jsx'
+import EmployeeBenefitsManagement from './components/EmployeeBenefitsManagement.jsx'
 import './App.css'
 
 function App() {
@@ -123,7 +124,7 @@ function App() {
       <main className="container mx-auto px-6 py-8">
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
           {/* 標籤導航 */}
-          <TabsList className="grid w-full grid-cols-8 bg-slate-800/50 border border-slate-700">
+          <TabsList className="grid w-full grid-cols-9 bg-slate-800/50 border border-slate-700">
             <TabsTrigger value="dashboard" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <BarChart3 className="w-4 h-4 mr-2" />
               儀表板
@@ -155,6 +156,10 @@ function App() {
             <TabsTrigger value="scheduling" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
               <Calendar className="w-4 h-4 mr-2" />
               整合排班
+            </TabsTrigger>
+            <TabsTrigger value="benefits" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white">
+              <Gift className="w-4 h-4 mr-2" />
+              員工福利
             </TabsTrigger>
           </TabsList>
 
@@ -415,6 +420,11 @@ function App() {
           {/* 整合排班系統 */}
           <TabsContent value="scheduling" className="space-y-6">
             <SchedulingSystem />
+          </TabsContent>
+
+          {/* 員工福利管理 */}
+          <TabsContent value="benefits" className="space-y-6">
+            <EmployeeBenefitsManagement />
           </TabsContent>
         </Tabs>
       </main>
